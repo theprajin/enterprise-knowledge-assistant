@@ -2,12 +2,17 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.database import get_db
+from app.api.files import router as files_router
 
 app = FastAPI(
     title="Enterprise Knowledge Assistant",
     description="Backend API for Enterprise Knowledge Assistant",
     version="1.0.0"
 )
+
+# Register routers
+app.include_router(files_router, prefix="/api")
+
 
 @app.get("/")
 def read_root():

@@ -95,3 +95,7 @@ env/
 
 # Database local storage
 postgres_data/
+
+# Uploaded documents
+uploads/
+
