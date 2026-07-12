@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db
+from app.database.connection import get_db
 from app.api.files import router as files_router
+from app.api.vectors import router as vectors_router
+from app.api.rag import router as rag_router
 
 app = FastAPI(
     title="Enterprise Knowledge Assistant",
@@ -12,6 +14,8 @@ app = FastAPI(
 
 # Register routers
 app.include_router(files_router, prefix="/api")
+app.include_router(vectors_router, prefix="/api")
+app.include_router(rag_router, prefix="/api")
 
 
 @app.get("/")
