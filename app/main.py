@@ -1,3 +1,6 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -5,11 +8,41 @@ from app.database.connection import get_db
 from app.api.files import router as files_router
 from app.api.vectors import router as vectors_router
 from app.api.rag import router as rag_router
+from app.observability.langfuse_config import (
+    is_langfuse_configured,
+    check_langfuse_health,
+)
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup and shutdown events."""
+    # Startup
+    if is_langfuse_configured():
+        logger.info("Langfuse is configured — observability and prompt management are enabled.")
+        health = check_langfuse_health()
+        if health["status"] == "connected":
+            logger.info(f"Langfuse connection verified: {health['host']}")
+        else:
+            logger.warning(f"Langfuse is configured but not reachable: {health['message']}")
+    else:
+        logger.info(
+            "Langfuse is not configured — running without observability. "
+            "Set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY in .env to enable."
+        )
+
+    yield  # Application is running
+
+    # Shutdown (nothing to clean up currently)
+
 
 app = FastAPI(
     title="Enterprise Knowledge Assistant",
     description="Backend API for Enterprise Knowledge Assistant",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Register routers
@@ -28,6 +61,14 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/langfuse-health")
+def langfuse_health():
+    """
+    Check the Langfuse connection status.
+    Returns configuration and connectivity information.
+    """
+    return check_langfuse_health()
 
 @app.get("/db-check")
 def db_check(db: Session = Depends(get_db)):

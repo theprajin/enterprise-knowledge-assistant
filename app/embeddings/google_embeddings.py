@@ -10,15 +10,16 @@ google_api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("Google_API_KEY")
 if google_api_key:
     os.environ["GOOGLE_API_KEY"] = google_api_key
 
+
 def get_embeddings():
     """
     Get the Google Generative AI embeddings model instance.
-    Uses 'text-embedding-004' by default.
+    Uses 'gemini-embedding-001' by default.
     """
     if not os.getenv("GOOGLE_API_KEY"):
-        raise ValueError("Google API key is not set. Please set GOOGLE_API_KEY or Google_API_KEY in your environment.")
-    
+        raise ValueError(
+            "Google API key is not set. Please set GOOGLE_API_KEY or Google_API_KEY in your environment."
+        )
     return GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
-        google_api_key=os.getenv("GOOGLE_API_KEY")
+        model="models/gemini-embedding-001", google_api_key=os.getenv("GOOGLE_API_KEY")
     )

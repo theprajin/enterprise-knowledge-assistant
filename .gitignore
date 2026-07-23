@@ -99,3 +99,6 @@ postgres_data/
 # Uploaded documents
 uploads/
 
+# Project-specific
+AGENTS.md
+
